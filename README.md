@@ -101,13 +101,8 @@ quartus_sh --flow compile DE1_Basic_Computer
 
 Ou via l'interface graphique : **Processing → Start Compilation**.
 
-### 3. Programmer le FPGA
 
-```bash
-quartus_pgm -c USB-Blaster -m JTAG -o "p;output_files/component_tutorial.sof"
-```
-
-### 4. Test via Altera Monitor Program
+### 3. Test via Altera Monitor Program
 
 - Ouvrir Monitor Program → nouveau projet → sélectionner `nios_system.qsys`
 - Onglet **Memory** → **Query All Devices** → **Refresh Memory**
