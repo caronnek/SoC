@@ -10,7 +10,7 @@ Concevoir et intégrer un **composant personnalisé** dans un système Nios II g
 
 ## Architecture de l'implémentation
 
-> `![Architecture du système](./architecture_component_tutorial.jpg)`
+> `![Architecture du système](./assets/architecture_component_tutorial.jpg)`
 
 ---
 
