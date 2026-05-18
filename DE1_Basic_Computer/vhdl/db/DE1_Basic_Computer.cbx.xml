@@ -1,9 +1,0 @@
-<?xml version="1.0" ?>
-<LOG_ROOT>
-	<PROJECT NAME="DE1_Basic_Computer">
-		<CBX_INST_ENTRY INSTANCE_NAME="|component_tutorial|nios_system:U0|nios_system_Onchip_memory:onchip_memory|altsyncram:the_altsyncram" CBX_FILE_NAME="altsyncram_ld32.tdf"/>
-		<CBX_INST_ENTRY INSTANCE_NAME="|component_tutorial|nios_system:U0|nios_system_cpu:cpu|nios_system_cpu_nios2_oci:the_nios_system_cpu_nios2_oci|nios_system_cpu_nios2_ocimem:the_nios_system_cpu_nios2_ocimem|nios_system_cpu_ociram_sp_ram_module:nios_system_cpu_ociram_sp_ram|altsyncram:the_altsyncram" CBX_FILE_NAME="altsyncram_gs71.tdf"/>
-		<CBX_INST_ENTRY INSTANCE_NAME="|component_tutorial|nios_system:U0|nios_system_cpu:cpu|nios_system_cpu_register_bank_a_module:nios_system_cpu_register_bank_a|altsyncram:the_altsyncram" CBX_FILE_NAME="altsyncram_cfg1.tdf"/>
-		<CBX_INST_ENTRY INSTANCE_NAME="|component_tutorial|nios_system:U0|nios_system_cpu:cpu|nios_system_cpu_register_bank_b_module:nios_system_cpu_register_bank_b|altsyncram:the_altsyncram" CBX_FILE_NAME="altsyncram_dfg1.tdf"/>
-	</PROJECT>
-</LOG_ROOT>
