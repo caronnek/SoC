@@ -33,9 +33,7 @@ PORT (
 END COMPONENT;
 
 BEGIN
-
-    to_reg <= writedata;
-	 readdata <= to_reg;
+		
     pwm_instance : PWM_generation
     PORT MAP (
         clk => clock ,
@@ -50,5 +48,30 @@ BEGIN
 		  dc_motor_p_L	=> Q_export(2),
 		  dc_motor_n_L	=> Q_export(3)
     );
+
+	process(clock, resetn)
+	begin
+	
+		if resetn = '0' then
+			to_reg   <= (others => '0');
+		elsif rising_edge(clock) then
+			if chipselect = '1' and write = '1' then
+				to_reg <= writedata;
+			end if;
+		end if;
+	end process;
+	
+	
+	process(clock, resetn)
+	begin
+	
+		if resetn = '0' then
+			readdata   <= (others => '0');
+		elsif rising_edge(clock) then
+			if chipselect = '1' and read = '1' then
+				readdata <= to_reg;
+			end if;
+		end if;
+	end process;
 
 END Structure;

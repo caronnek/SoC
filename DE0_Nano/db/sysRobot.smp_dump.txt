@@ -1,4 +1,15 @@
 
+State Machine - |sysRobot|nios_system:NiosII|acquisition_avalon_interface:acquisition_avalon_interface_0|capteurs_sol_seuil:capteur_sol_seuil_instance|State
+Name State.S7 State.S6 State.S5 State.S4 State.S3 State.S2 State.S1 State.S0 
+State.S0 0 0 0 0 0 0 0 0 
+State.S1 0 0 0 0 0 0 1 1 
+State.S2 0 0 0 0 0 1 0 1 
+State.S3 0 0 0 0 1 0 0 1 
+State.S4 0 0 0 1 0 0 0 1 
+State.S5 0 0 1 0 0 0 0 1 
+State.S6 0 1 0 0 0 0 0 1 
+State.S7 1 0 0 0 0 0 0 1 
+
 State Machine - |sysRobot|nios_system:NiosII|nios_system_SDRAM:sdram|m_next
 Name m_next.010000000 m_next.000010000 m_next.000001000 m_next.000000001 
 m_next.000000001 0 0 0 0 

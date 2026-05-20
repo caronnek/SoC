@@ -70,6 +70,14 @@
          type = "int";
       }
    }
+   element acquisition_avalon_interface_0
+   {
+      datum _sortIndex
+      {
+         value = "8";
+         type = "int";
+      }
+   }
    element JTAG_UART.avalon_jtag_slave
    {
       datum _lockedAddress
@@ -83,7 +91,20 @@
          type = "String";
       }
    }
-   element pwm_avalon_interface_1.avalon_slave_0
+   element acquisition_avalon_interface_0.avalon_slave_0
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "4";
+         type = "String";
+      }
+   }
+   element pwm_avalon_interface_0.avalon_slave_0
    {
       datum _lockedAddress
       {
@@ -122,25 +143,12 @@
          type = "String";
       }
    }
-   element pwm_avalon_interface_1
+   element pwm_avalon_interface_0
    {
       datum _sortIndex
       {
          value = "7";
          type = "int";
-      }
-   }
-   element OUTPUT.s1
-   {
-      datum _lockedAddress
-      {
-         value = "1";
-         type = "boolean";
-      }
-      datum baseAddress
-      {
-         value = "12288";
-         type = "String";
       }
    }
    element INPUT.s1
@@ -153,6 +161,19 @@
       datum baseAddress
       {
          value = "12304";
+         type = "String";
+      }
+   }
+   element OUTPUT.s1
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "12288";
          type = "String";
       }
    }
@@ -197,7 +218,7 @@
  <parameter name="projectName" value="sysRobot.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1779089632478" />
+ <parameter name="timeStamp" value="1779277085395" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk" internal="clk_0.clk_in" type="clock" dir="end" />
@@ -215,7 +236,22 @@
  <interface name="sdram_wire" internal="SDRAM.wire" type="conduit" dir="end" />
  <interface
    name="pwm_avalon_interface"
-   internal="pwm_avalon_interface_1.conduit_end"
+   internal="pwm_avalon_interface_0.conduit_end"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="acquisition_avalon_interfac_conduit_2"
+   internal="acquisition_avalon_interface_0.conduit_end_2"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="acquisition_avalon_interface_conduit_0"
+   internal="acquisition_avalon_interface_0.conduit_end"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="acquisition_avalon_interface_conduit_1"
+   internal="acquisition_avalon_interface_0.conduit_end_1"
    type="conduit"
    dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk_0">
@@ -326,7 +362,7 @@
   <parameter name="tightlyCoupledInstructionMaster2AddrWidth" value="1" />
   <parameter name="tightlyCoupledInstructionMaster3AddrWidth" value="1" />
   <parameter name="instSlaveMapParam"><![CDATA[<address-map><slave name='MEMOIRE_INTERNE.s1' start='0x1000' end='0x2000' /><slave name='CPU.jtag_debug_module' start='0x2800' end='0x3000' /><slave name='SDRAM.s1' start='0x4000000' end='0x6000000' /></address-map>]]></parameter>
-  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='pwm_avalon_interface_1.avalon_slave_0' start='0x0' end='0x4' /><slave name='MEMOIRE_INTERNE.s1' start='0x1000' end='0x2000' /><slave name='CPU.jtag_debug_module' start='0x2800' end='0x3000' /><slave name='OUTPUT.s1' start='0x3000' end='0x3010' /><slave name='INPUT.s1' start='0x3010' end='0x3020' /><slave name='JTAG_UART.avalon_jtag_slave' start='0x3020' end='0x3028' /><slave name='SDRAM.s1' start='0x4000000' end='0x6000000' /></address-map>]]></parameter>
+  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='pwm_avalon_interface_0.avalon_slave_0' start='0x0' end='0x4' /><slave name='acquisition_avalon_interface_0.avalon_slave_0' start='0x4' end='0x8' /><slave name='MEMOIRE_INTERNE.s1' start='0x1000' end='0x2000' /><slave name='CPU.jtag_debug_module' start='0x2800' end='0x3000' /><slave name='OUTPUT.s1' start='0x3000' end='0x3010' /><slave name='INPUT.s1' start='0x3010' end='0x3020' /><slave name='JTAG_UART.avalon_jtag_slave' start='0x3020' end='0x3028' /><slave name='SDRAM.s1' start='0x4000000' end='0x6000000' /></address-map>]]></parameter>
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="deviceFamilyName" value="Cyclone IV E" />
   <parameter name="internalIrqMaskSystemInfo" value="32" />
@@ -454,7 +490,14 @@
    kind="pwm_avalon_interface"
    version="1.0"
    enabled="1"
-   name="pwm_avalon_interface_1" />
+   name="pwm_avalon_interface_0">
+  <parameter name="AUTO_CLOCK_SINK_CLOCK_RATE" value="50000000" />
+ </module>
+ <module
+   kind="acquisition_avalon_interface"
+   version="1.0"
+   enabled="1"
+   name="acquisition_avalon_interface_0" />
  <connection
    kind="avalon"
    version="13.0"
@@ -589,26 +632,50 @@
    kind="clock"
    version="13.0"
    start="clk_0.clk"
-   end="pwm_avalon_interface_1.clock_sink" />
+   end="pwm_avalon_interface_0.clock_sink" />
  <connection
    kind="reset"
    version="13.0"
    start="clk_0.clk_reset"
-   end="pwm_avalon_interface_1.reset_sink" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="CPU.jtag_debug_module_reset"
-   end="pwm_avalon_interface_1.reset_sink" />
+   end="pwm_avalon_interface_0.reset_sink" />
  <connection
    kind="avalon"
    version="13.0"
    start="CPU.data_master"
-   end="pwm_avalon_interface_1.avalon_slave_0">
+   end="pwm_avalon_interface_0.avalon_slave_0">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
+ <connection
+   kind="reset"
+   version="13.0"
+   start="CPU.jtag_debug_module_reset"
+   end="pwm_avalon_interface_0.reset_sink" />
+ <connection
+   kind="clock"
+   version="13.0"
+   start="clk_0.clk"
+   end="acquisition_avalon_interface_0.clock_sink" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="CPU.data_master"
+   end="acquisition_avalon_interface_0.avalon_slave_0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0004" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="reset"
+   version="13.0"
+   start="CPU.jtag_debug_module_reset"
+   end="acquisition_avalon_interface_0.reset_sink" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk_0.clk_reset"
+   end="acquisition_avalon_interface_0.reset_sink" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>

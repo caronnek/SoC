@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <LOG_ROOT>
 	<PROJECT NAME="sysRobot">
+		<CBX_INST_ENTRY INSTANCE_NAME="|sysRobot|nios_system:NiosII|acquisition_avalon_interface:acquisition_avalon_interface_0|pll_2freqs:pll_2freqs_instance|altpll:altpll_component" CBX_FILE_NAME="pll40_altpll.v"/>
 		<CBX_INST_ENTRY INSTANCE_NAME="|sysRobot|nios_system:NiosII|nios_system_CPU:cpu|nios_system_CPU_nios2_oci:the_nios_system_CPU_nios2_oci|nios_system_CPU_nios2_ocimem:the_nios_system_CPU_nios2_ocimem|nios_system_CPU_ociram_sp_ram_module:nios_system_CPU_ociram_sp_ram|altsyncram:the_altsyncram" CBX_FILE_NAME="altsyncram_2181.tdf"/>
 		<CBX_INST_ENTRY INSTANCE_NAME="|sysRobot|nios_system:NiosII|nios_system_CPU:cpu|nios_system_CPU_register_bank_a_module:nios_system_CPU_register_bank_a|altsyncram:the_altsyncram" CBX_FILE_NAME="altsyncram_ujg1.tdf"/>
 		<CBX_INST_ENTRY INSTANCE_NAME="|sysRobot|nios_system:NiosII|nios_system_CPU:cpu|nios_system_CPU_register_bank_b_module:nios_system_CPU_register_bank_b|altsyncram:the_altsyncram" CBX_FILE_NAME="altsyncram_vjg1.tdf"/>

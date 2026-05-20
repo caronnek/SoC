@@ -1,5 +1,5 @@
 Flow report for sysRobot
-Mon May 18 12:32:15 2026
+Wed May 20 14:04:41 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Full Version
 
 
@@ -40,22 +40,22 @@ applicable agreement for further details.
 +---------------------------------------------------------------------------------------+
 ; Flow Summary                                                                          ;
 +------------------------------------+--------------------------------------------------+
-; Flow Status                        ; Successful - Mon May 18 12:32:02 2026            ;
+; Flow Status                        ; Successful - Wed May 20 14:04:19 2026            ;
 ; Quartus II 32-bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Full Version ;
 ; Revision Name                      ; sysRobot                                         ;
 ; Top-level Entity Name              ; sysRobot                                         ;
 ; Family                             ; Cyclone IV E                                     ;
 ; Device                             ; EP4CE22F17C6                                     ;
 ; Timing Models                      ; Final                                            ;
-; Total logic elements               ; 2,491 / 22,320 ( 11 % )                          ;
-;     Total combinational functions  ; 2,277 / 22,320 ( 10 % )                          ;
-;     Dedicated logic registers      ; 1,506 / 22,320 ( 7 % )                           ;
-; Total registers                    ; 1575                                             ;
-; Total pins                         ; 53 / 154 ( 34 % )                                ;
+; Total logic elements               ; 2,732 / 22,320 ( 12 % )                          ;
+;     Total combinational functions  ; 2,429 / 22,320 ( 11 % )                          ;
+;     Dedicated logic registers      ; 1,711 / 22,320 ( 8 % )                           ;
+; Total registers                    ; 1780                                             ;
+; Total pins                         ; 62 / 154 ( 40 % )                                ;
 ; Total virtual pins                 ; 0                                                ;
 ; Total memory bits                  ; 44,032 / 608,256 ( 7 % )                         ;
 ; Embedded Multiplier 9-bit elements ; 0 / 132 ( 0 % )                                  ;
-; Total PLLs                         ; 0 / 4 ( 0 % )                                    ;
+; Total PLLs                         ; 1 / 4 ( 25 % )                                   ;
 +------------------------------------+--------------------------------------------------+
 
 
@@ -64,7 +64,7 @@ applicable agreement for further details.
 +-------------------+---------------------+
 ; Option            ; Setting             ;
 +-------------------+---------------------+
-; Start date & time ; 05/18/2026 12:30:43 ;
+; Start date & time ; 05/20/2026 14:01:29 ;
 ; Main task         ; Compilation         ;
 ; Revision Name     ; sysRobot            ;
 +-------------------+---------------------+
@@ -75,7 +75,7 @@ applicable agreement for further details.
 +-------------------------------------+---------------------------------------+---------------+--------------------+------------+
 ; Assignment Name                     ; Value                                 ; Default Value ; Entity Name        ; Section Id ;
 +-------------------------------------+---------------------------------------+---------------+--------------------+------------+
-; COMPILER_SIGNATURE_ID               ; 44829937158123.177910024319784        ; --            ; --                 ; --         ;
+; COMPILER_SIGNATURE_ID               ; 154946506112264.177927848919484       ; --            ; --                 ; --         ;
 ; MAX_CORE_JUNCTION_TEMP              ; 85                                    ; --            ; --                 ; --         ;
 ; MIN_CORE_JUNCTION_TEMP              ; 0                                     ; --            ; --                 ; --         ;
 ; NOMINAL_CORE_SUPPLY_VOLTAGE         ; 1.2V                                  ; --            ; --                 ; --         ;
@@ -99,11 +99,11 @@ applicable agreement for further details.
 +---------------------------+--------------+-------------------------+---------------------+------------------------------------+
 ; Module Name               ; Elapsed Time ; Average Processors Used ; Peak Virtual Memory ; Total CPU Time (on all processors) ;
 +---------------------------+--------------+-------------------------+---------------------+------------------------------------+
-; Analysis & Synthesis      ; 00:00:50     ; 1.0                     ; 513 MB              ; 00:00:16                           ;
-; Fitter                    ; 00:00:18     ; 3.8                     ; 893 MB              ; 00:00:13                           ;
-; Assembler                 ; 00:00:11     ; 1.0                     ; 397 MB              ; 00:00:01                           ;
-; TimeQuest Timing Analyzer ; 00:00:12     ; 1.0                     ; 509 MB              ; 00:00:03                           ;
-; Total                     ; 00:01:31     ; --                      ; --                  ; 00:00:33                           ;
+; Analysis & Synthesis      ; 00:01:42     ; 1.0                     ; 486 MB              ; 00:00:46                           ;
+; Fitter                    ; 00:00:36     ; 1.5                     ; 721 MB              ; 00:00:23                           ;
+; Assembler                 ; 00:00:12     ; 1.0                     ; 390 MB              ; 00:00:03                           ;
+; TimeQuest Timing Analyzer ; 00:00:20     ; 1.5                     ; 471 MB              ; 00:00:06                           ;
+; Total                     ; 00:02:50     ; --                      ; --                  ; 00:01:18                           ;
 +---------------------------+--------------+-------------------------+---------------------+------------------------------------+
 
 
@@ -112,10 +112,10 @@ applicable agreement for further details.
 +---------------------------+------------------+-----------+------------+----------------+
 ; Module Name               ; Machine Hostname ; OS Name   ; OS Version ; Processor type ;
 +---------------------------+------------------+-----------+------------+----------------+
-; Analysis & Synthesis      ; a-013845         ; Windows 7 ; 6.2        ; x86_64         ;
-; Fitter                    ; a-013845         ; Windows 7 ; 6.2        ; x86_64         ;
-; Assembler                 ; a-013845         ; Windows 7 ; 6.2        ; x86_64         ;
-; TimeQuest Timing Analyzer ; a-013845         ; Windows 7 ; 6.2        ; x86_64         ;
+; Analysis & Synthesis      ; a-137154         ; Windows 7 ; 6.2        ; x86_64         ;
+; Fitter                    ; a-137154         ; Windows 7 ; 6.2        ; x86_64         ;
+; Assembler                 ; a-137154         ; Windows 7 ; 6.2        ; x86_64         ;
+; TimeQuest Timing Analyzer ; a-137154         ; Windows 7 ; 6.2        ; x86_64         ;
 +---------------------------+------------------+-----------+------------+----------------+
 
 

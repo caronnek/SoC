@@ -15,7 +15,7 @@
   </columns>
  </clocktable>
  <library expandedCategories="Library,Project/My Own IP Cores,Project" />
- <window width="1616" height="868" x="-8" y="-8" />
+ <window width="1616" height="868" x="122" y="198" />
  <generation synthesis="VHDL" />
  <hdlexample language="VERILOG" />
 </preferences>
