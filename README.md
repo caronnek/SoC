@@ -12,31 +12,29 @@ Le schéma ci-dessous présente l'architecture globale, inspirée de la figure 1
 
 ```mermaid
 graph TD
-    subgraph FPGA ["FPGA - DE10-Lite / CUTEcar"]
-        subgraph QSYS ["nios_system - Qsys"]
-            N1["Nios II/e"]
-            N2["On-chip RAM"]
-            N3["SDRAM ctrl"]
-            N4["Avalon Interconnect"]
-            N5["pwm_avalon_interface"]
-            N6["PWM_generation - 16 kHz - 2 canaux"]
+    subgraph FPGA["FPGA - DE10-Lite / CUTEcar"]
+        subgraph QSYS["nios_system - Qsys"]
+            n1["Nios II/e"]
+            n2["On-chip RAM"]
+            n3["SDRAM ctrl"]
+            n4["Avalon Interconnect"]
+            n5["pwm_avalon_interface"]
+            n6["PWM_generation - 16kHz - 2 canaux"]
         end
-        N7["SDRAM 32 MB"]
+        n7["SDRAM 32MB"]
     end
-    N8["Moteurs DC CUTEcar"]
+    n8["Moteurs DC CUTEcar"]
 
-    N1 -->|master|        N4
-    N2 -->|slave|         N4
-    N3 -->|slave|         N4
-    N3 -->                N7
-    N4 -->|slave|         N5
-    N5 -->|writedata 32b| N6
-    N6 -.->|"Q_export conduit"| N8
+    n1-->|master|n4
+    n2-->|slave|n4
+    n3-->|slave|n4
+    n3-->n7
+    n4-->|slave|n5
+    n5-->|writedata 32b|n6
+    n6-.->|Q_export conduit|n8
 
-    style N5 fill:#FAECE7,stroke:#D85A30,color:#712B13
-    style N6 fill:#FAEEDA,stroke:#BA7517,color:#633806
-    style N4 fill:#EEEDFE,stroke:#534AB7,color:#26215C
-    style N8 fill:#FAECE7,stroke:#D85A30,color:#712B13
+    style n5 stroke:#D85A30,stroke-width:2px
+    style n6 stroke:#BA7517,stroke-width:2px
 ```
 
 ### Signaux de pwm_avalon_interface
