@@ -26,7 +26,8 @@ graph TD
     end
     n11["Moteurs DC CUTEcar"]
     n12["ADC LTC2308 - 7 capteurs sol"]
-
+    n13["LEDs - vect_capt"]
+ 
     n1-->|master|n4
     n2-->|slave|n4
     n3-->|slave|n4
@@ -35,14 +36,15 @@ graph TD
     n5-->|writedata 32b|n6
     n6-.->|Q_export conduit|n11
     n4-->|slave|n7
-    n7-->n8
     n7-->|NIVEAU 8b|n9
+    n7-->n8
     n8-->|clk 40MHz|n9
-    n8-->|clk 2kHz - trigger|n9
-    n9-.->|"Q_ADC_OUT conduit"|n12
-    n12-.->|"Q_ADC_IN conduit"|n9
+    n8-->|clk 2kHz trigger|n9
+    n9-.->|Q_ADC_OUT conduit|n12
+    n12-.->|Q_ADC_IN conduit|n9
     n9-->|vect_capt + data_ready|n7
-
+    n7-.->|Q_export conduit|n13
+ 
     style n7 stroke:#2563EB,stroke-width:2px
     style n9 stroke:#2563EB,stroke-width:2px
     style n8 stroke:#2563EB,stroke-width:2px
