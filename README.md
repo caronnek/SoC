@@ -10,7 +10,7 @@ Ce projet implémente un composant Qsys personnalisé nommé **PWM** destiné au
 
 Le schéma ci-dessous présente l'architecture globale, inspirée de la figure 1 du tutoriel *Making Qsys Components* (Altera, 2013). Le système généré par Qsys (`nios_system`) s'instancie dans le top-level VHDL `sysRobot` qui porte les entrées/sorties physiques de la carte.
 
-
+> ![Architecture du système](./architecture_pwm_qsys.svg)
 
 ---
 
@@ -135,6 +135,7 @@ int main()
         // Pause 2 secondes
         usleep(2);
     }
+}
 ```
 
 ---
