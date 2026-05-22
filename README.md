@@ -12,12 +12,12 @@ Le schéma ci-dessous présente l'architecture globale, inspirée de la figure 1
 
 ```mermaid
 graph TD
-    subgraph FPGA["FPGA - DE10-Lite / CUTEcar"]
+    subgraph FPGA["FPGA - DE0-Nano/ CUTEcar"]
         subgraph QSYS["nios_system - Qsys"]
             n1["Nios II/e"]
             n2["On-chip RAM"]
             n3["SDRAM ctrl"]
-            n4["Avalon Interconnect"]
+            n4["Bus Avalon"]
             n5["pwm_avalon_interface"]
             n6["PWM_generation - 16kHz - 2 canaux"]
         end
