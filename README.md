@@ -80,25 +80,61 @@ CUTEcar_PWM/
 Depuis le code C tournant sur le Nios II, le registre PWM se pilote par une simple écriture en mémoire à l'adresse de base assignée par Qsys:
 
 ```c
-#include "system.h"   // adresses générées par Qsys
+#define PWM_MAX 0xFFF
 
-#define PWM_BASE  PWM_AVALON_INTERFACE_0_BASE
-
-// Encodage : [go(1)|sens(0=avant)|vitesse 12 bits]
-#define CMD(go, dir, spd) (((go)<<13) | ((dir)<<12) | ((spd) & 0xFFF))
-
-void set_motors(uint16_t speed_R, uint8_t dir_R,
-                uint16_t speed_L, uint8_t dir_L)
+// Construction commande moteur 14 bits
+uint16_t motor_cmd(uint8_t go, uint8_t backward, uint16_t speed)
 {
-    uint32_t cmd_R = CMD(1, dir_R, speed_R);   // bits [13:0]
-    uint32_t cmd_L = CMD(1, dir_L, speed_L);   // bits [27:14]
-    IOWR_32DIRECT(PWM_BASE, 0, cmd_R | (cmd_L << 14));
+    speed &= PWM_MAX;
+
+    return (go << 13) | (backward << 12) | speed;
 }
 
-void stop_motors(void)
+int main()
 {
-    IOWR_32DIRECT(PWM_BASE, 0, 0x00000000);
-}
+    uint16_t vitesse;
+
+    uint16_t motorR;
+    uint16_t motorL;
+
+    uint32_t data;
+
+    printf("Caracterisation moteur PWM\n");
+
+    while (1)
+    {
+        // Balayage PWM
+        for (vitesse = 0; vitesse <= PWM_MAX; vitesse += 0x20)
+        {
+            // GO = 1
+            // DIR = 0 -> forward
+            motorR = motor_cmd(1, 0, vitesse);
+            motorL = motor_cmd(1, 0, vitesse);
+
+            // Packing registre 32 bits
+            data = ((uint32_t)motorL << 14) | motorR;
+
+            // Ecriture Avalon
+            IOWR(PWM_AVALON_INTERFACE_1_BASE, 0, data);
+
+            // Affichage
+            printf("PWM = 0x%03X (%4d)   DATA = 0x%08X\n",
+                   vitesse,
+                   vitesse,
+                   data);
+
+            // Attente 200 ms
+            usleep(200000);
+        }
+
+        // STOP moteurs
+        IOWR(PWM_AVALON_INTERFACE_1_BASE, 0, 0);
+
+        printf("Fin balayage\n");
+
+        // Pause 2 secondes
+        usleep(2);
+    }
 ```
 
 ---
