@@ -10,7 +10,60 @@ Ce projet implémente un composant Qsys personnalisé nommé **PWM** destiné au
 
 Le schéma ci-dessous présente l'architecture globale, inspirée de la figure 1 du tutoriel *Making Qsys Components* (Altera, 2013). Le système généré par Qsys (`nios_system`) s'instancie dans le top-level VHDL `sysRobot` qui porte les entrées/sorties physiques de la carte.
 
-> ![Architecture du système](./architecture_pwm_qsys.svg)
+```mermaid
+graph TD
+    subgraph FPGA ["FPGA – DE10-Lite / CUTEcar"]
+        subgraph QSYS ["nios_system (Qsys)"]
+            NIOS["Nios II/e\nProcesseur RISC"]
+            RAM["On-chip RAM\nReset / Exception"]
+            SDRAM_C["SDRAM ctrl\n32 MB"]
+            AVALON["▬▬▬  Avalon Interconnect  ▬▬▬"]
+            PWM_IF["pwm_avalon_interface\nRegistre 32 bits R/W\n— slave Avalon MM —"]
+            PWM_GEN["PWM_generation\n16 kHz – 2 canaux\nForward / Backward"]
+        end
+        SDRAM_EXT["SDRAM\n32 MB"]
+    end
+    MOTORS["Moteurs DC CUTEcar\nMTRR_P / MTRR_N  droit\nMTRL_P / MTRL_N  gauche"]
+
+    NIOS      -->|master|         AVALON
+    RAM       -->|slave|          AVALON
+    SDRAM_C   -->|slave|          AVALON
+    SDRAM_C   -->                 SDRAM_EXT
+    AVALON    -->|slave|          PWM_IF
+    PWM_IF    -->|writedata 32b|  PWM_GEN
+    PWM_GEN   -.->|"Q_export[3:0]\nconduit Avalon"| MOTORS
+
+    style PWM_IF  fill:#FAECE7,stroke:#D85A30,color:#712B13
+    style PWM_GEN fill:#FAEEDA,stroke:#BA7517,color:#633806
+    style AVALON  fill:#EEEDFE,stroke:#534AB7,color:#26215C
+    style MOTORS  fill:#FAECE7,stroke:#D85A30,color:#712B13
+```
+
+### Signaux de pwm_avalon_interface
+
+**Entrées — Nios II → composant**
+
+| Signal | Type | Description |
+|--------|------|-------------|
+| `clock` | STD_LOGIC | Horloge 50 MHz |
+| `resetn` | STD_LOGIC | Reset actif bas |
+| `chipselect` | STD_LOGIC | Sélection du composant |
+| `write` | STD_LOGIC | Transaction écriture |
+| `read` | STD_LOGIC | Transaction lecture |
+| `writedata[31:0]` | SLV 31:0 | Commande moteurs |
+| `byteenable[3:0]` | SLV 3:0 | Masque octet |
+
+**Sorties — composant → extérieur**
+
+| Signal | Type | Description |
+|--------|------|-------------|
+| `readdata[31:0]` | SLV 31:0 | Relecture registre |
+| `Q_export[0]` | STD_LOGIC | MTRR_P — moteur droit avant |
+| `Q_export[1]` | STD_LOGIC | MTRR_N — moteur droit arrière |
+| `Q_export[2]` | STD_LOGIC | MTRL_P — moteur gauche avant |
+| `Q_export[3]` | STD_LOGIC | MTRL_N — moteur gauche arrière |
+
+> `Q_export[3:0]` est un **conduit Avalon** : non routé sur l'interconnect MM, exporté directement vers les sorties physiques du FPGA dans `sysRobot.vhd`.
 
 ---
 
