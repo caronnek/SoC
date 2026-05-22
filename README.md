@@ -12,31 +12,31 @@ Le schéma ci-dessous présente l'architecture globale, inspirée de la figure 1
 
 ```mermaid
 graph TD
-    subgraph FPGA ["FPGA – DE10-Lite / CUTEcar"]
-        subgraph QSYS ["nios_system (Qsys)"]
-            NIOS["Nios II/e\nProcesseur RISC"]
-            RAM["On-chip RAM\nReset / Exception"]
-            SDRAM_C["SDRAM ctrl\n32 MB"]
-            AVALON["▬▬▬  Avalon Interconnect  ▬▬▬"]
-            PWM_IF["pwm_avalon_interface\nRegistre 32 bits R/W\n— slave Avalon MM —"]
-            PWM_GEN["PWM_generation\n16 kHz – 2 canaux\nForward / Backward"]
+    subgraph FPGA ["FPGA - DE10-Lite / CUTEcar"]
+        subgraph QSYS ["nios_system - Qsys"]
+            NIOS["Nios II/e"]
+            RAM["On-chip RAM"]
+            SDRAM_C["SDRAM ctrl"]
+            AVALON["Avalon Interconnect"]
+            PWM_IF["pwm_avalon_interface"]
+            PWM_GEN["PWM_generation - 16 kHz - 2 canaux"]
         end
-        SDRAM_EXT["SDRAM\n32 MB"]
+        SDRAM_EXT["SDRAM 32 MB"]
     end
-    MOTORS["Moteurs DC CUTEcar\nMTRR_P / MTRR_N  droit\nMTRL_P / MTRL_N  gauche"]
+    MOTORS["Moteurs DC CUTEcar"]
 
-    NIOS      -->|master|         AVALON
-    RAM       -->|slave|          AVALON
-    SDRAM_C   -->|slave|          AVALON
-    SDRAM_C   -->                 SDRAM_EXT
-    AVALON    -->|slave|          PWM_IF
-    PWM_IF    -->|writedata 32b|  PWM_GEN
-    PWM_GEN   -.->|"Q_export[3:0]\nconduit Avalon"| MOTORS
+    NIOS     -->|master|        AVALON
+    RAM      -->|slave|         AVALON
+    SDRAM_C  -->|slave|         AVALON
+    SDRAM_C  -->                SDRAM_EXT
+    AVALON   -->|slave|         PWM_IF
+    PWM_IF   -->|writedata 32b| PWM_GEN
+    PWM_GEN  -.->|"Q_export conduit"| MOTORS
 
     style PWM_IF  fill:#FAECE7,stroke:#D85A30,color:#712B13
     style PWM_GEN fill:#FAEEDA,stroke:#BA7517,color:#633806
     style AVALON  fill:#EEEDFE,stroke:#534AB7,color:#26215C
-    style MOTORS  fill:#FAECE7,stroke:#D85A30,color:#712B13
+    style MOTORS  fill:#FAECE7,stroke:#D85A30,color:#712B13Sonnet
 ```
 
 ### Signaux de pwm_avalon_interface
