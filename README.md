@@ -1,1 +1,111 @@
+# Composant Qsys PWM — Contrôle moteur CUTEcar
 
+## Présentation du projet
+
+Ce projet implémente un composant Qsys personnalisé nommé **PWM** destiné au contrôle des moteurs à courant continu du robot **CUTEcar** sur carte DE0-Nano (FPGA Altera Cyclone V). Le composant est intégré dans un système embarqué Nios II via le bus **Avalon Memory-Mapped (MM)** et génère deux signaux PWM indépendants — un par roue — permettant le contrôle en vitesse, sens de rotation et arrêt de chaque moteur.
+
+---
+
+## Architecture du système
+
+Le schéma ci-dessous présente l'architecture globale, inspirée de la figure 1 du tutoriel *Making Qsys Components* (Altera, 2013). Le système généré par Qsys (`nios_system`) s'instancie dans le top-level VHDL `sysRobot` qui porte les entrées/sorties physiques de la carte.
+
+
+
+---
+
+## Interface Avalon — Registre de commande
+
+Le composant expose **un unique registre 32 bits** en lecture/écriture à l'adresse assignée par Qsys.
+
+| Bits | Champ | Description |
+|------|-------|-------------|
+| [13:0] | Commande moteur droit (R) | bit 13 : go/stop — bit 12 : sens (0=avant, 1=arrière) — bits [11:0] : durée état haut (vitesse) |
+| [27:14] | Commande moteur gauche (L) | même encodage que les bits [13:0] |
+| [31:28] | Réservés | non utilisés |
+
+La largeur de l'impulsion (bits [11:0]) est comparée au compteur interne du générateur PWM. Plus la valeur est élevée, plus le rapport cyclique est grand et la vitesse est élevée. La période totale vaut `fFPGA / fPWM = 50 000 000 / 16 000 = 3125 tops d'horloge`.
+
+### Signaux de l'interface Avalon MM slave
+
+| Signal | Direction | Rôle |
+|--------|-----------|------|
+| `clock` | entrée | Horloge système (50 MHz) |
+| `resetn` | entrée | Reset actif bas |
+| `chipselect` | entrée | Sélection du composant |
+| `write` | entrée | Transaction d'écriture |
+| `read` | entrée | Transaction de lecture |
+| `writedata[31:0]` | entrée | Données envoyées par le maître |
+| `readdata[31:0]` | sortie | Relecture du registre interne |
+| `byteenable[3:0]` | entrée | Masque d'activation par octet |
+| `Q_export[3:0]` | sortie (conduit) | Signaux PWM vers les moteurs |
+
+---
+
+## Arborescence du projet
+
+Seuls les fichiers essentiels à la compréhension et à la synthèse du projet sont listés ci-dessous.
+
+```
+CUTEcar_PWM/
+│
+├── sysRobot.vhd                  # Top-level VHDL — instancie nios_system,
+│                                 # connecte l'FPGA aux E/S physiques de la carte
+│                                 # (CLOCK_50, KEY, LED, DRAM_*, MTRR/MTRL)
+│
+├── nios_system/                  # Système généré par Qsys
+│   ├── nios_system.qsys          # Fichier de projet Qsys (composants + connexions)
+│   └── synthesis/
+│       └── nios_system.qip       # Fichier d'inclusion pour Quartus II
+│
+├── ip_cores/  
+|    ├── pwm_avalon_interface.vhd      # Interface Avalon MM slave (composant custom Qsys)
+│    |                            # Registre 32 bits R/W, instancie PWM_generation,
+│    |                            # expose Q_export[3:0] en conduit
+|    └── PWM_generation.vhd            # Logique PWM pure — 2 canaux 16 kHz,
+│                                 # go/stop + sens + vitesse par roue
+│
+└── software/
+    └── carac-motor.c             # Code C Nios II — Détermination expérimentale
+                                  # de la vitesse minimale de démarrage des roues.
+                                  # Envoie des commandes PWM croissantes via
+                                  # IOWR_32DIRECT à PWM_AVALON_INTERFACE_0_BASE
+                                  # (adresse définie dans system.h, générée par le BSP)
+```
+
+---
+
+## Utilisation depuis le logiciel Nios II
+
+Depuis le code C tournant sur le Nios II, le registre PWM se pilote par une simple écriture en mémoire à l'adresse de base assignée par Qsys:
+
+```c
+#include "system.h"   // adresses générées par Qsys
+
+#define PWM_BASE  PWM_AVALON_INTERFACE_0_BASE
+
+// Encodage : [go(1)|sens(0=avant)|vitesse 12 bits]
+#define CMD(go, dir, spd) (((go)<<13) | ((dir)<<12) | ((spd) & 0xFFF))
+
+void set_motors(uint16_t speed_R, uint8_t dir_R,
+                uint16_t speed_L, uint8_t dir_L)
+{
+    uint32_t cmd_R = CMD(1, dir_R, speed_R);   // bits [13:0]
+    uint32_t cmd_L = CMD(1, dir_L, speed_L);   // bits [27:14]
+    IOWR_32DIRECT(PWM_BASE, 0, cmd_R | (cmd_L << 14));
+}
+
+void stop_motors(void)
+{
+    IOWR_32DIRECT(PWM_BASE, 0, 0x00000000);
+}
+```
+
+---
+
+## Remarques de conception
+
+- La fréquence PWM de **16 kHz** est choisie pour rester au-delà du spectre audible et assurer une réponse dynamique suffisante pour un robot de petite taille.
+- La direction est gérée par commutation des broches `_P` (positive) et `_N` (négative) du pont en H : une seule broche reçoit le signal PWM à la fois, l'autre est maintenue à `'0'`.
+- Le signal `Q_export[3:0]` est exporté en tant que **conduit Avalon** (non routé sur l'interconnect), puis connecté dans `sysRobot.vhd` directement aux sorties physiques `MTRR_P`, `MTRR_N`, `MTRL_P`, `MTRL_N`.
+- La relecture (`read`) du registre retourne l'état courant de `to_reg`, ce qui permet au logiciel de vérifier la commande effectivement envoyée aux moteurs.
