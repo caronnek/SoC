@@ -1,127 +1,165 @@
-# TP — Composant Spécialisé sur Qsys (Nios II / Avalon MM)
+# Composant Qsys Acquisition — Détection de ligne CUTEcar
+
+## Présentation du projet
+
+Ce projet implémente un composant Qsys personnalisé nommé **Acquisition** destiné à la lecture des capteurs sol du robot **CUTEcar** sur carte DE0-Nano (FPGA Altera Cyclone IV). Le composant pilote un ADC **LTC2308** via SPI pour acquérir les valeurs des 7 capteurs infrarouge, les compare à un seuil configurable, et retourne un vecteur binaire `vect_capt[6:0]` indiquant la position du robot par rapport à la ligne noire.
 
 ---
 
-## Objectif
+## Architecture du système
 
-Concevoir et intégrer un **composant personnalisé** dans un système Nios II généré par Qsys (Quartus II 13.0), en utilisant l'interface bus **Avalon Memory-Mapped (Avalon MM)**. Le composant réalisé est un registre 16 bits dont la valeur est exportée vers des afficheurs 7 segments via un **Avalon Conduit Interface**.
+```mermaid
+graph TD
+    subgraph FPGA["FPGA - DE0-Nano / CUTEcar"]
+        subgraph QSYS["nios_system - Qsys"]
+            n1["Nios II/e"]
+            n2["On-chip RAM"]
+            n3["SDRAM ctrl"]
+            n4["Avalon Interconnect"]
+            n5["pwm_avalon_interface"]
+            n6["PWM_generation - 16kHz - 2 canaux"]
+            n7["acquisition_avalon_interface"]
+            n8["pll_2freqs - 40MHz / 2kHz"]
+            n9["capteurs_sol_seuil"]
+        end
+        n10["SDRAM 32MB"]
+    end
+    n11["Moteurs DC CUTEcar"]
+    n12["ADC LTC2308 - 7 capteurs sol"]
+
+    n1-->|master|n4
+    n2-->|slave|n4
+    n3-->|slave|n4
+    n3-->n10
+    n4-->|slave|n5
+    n5-->|writedata 32b|n6
+    n6-.->|Q_export conduit|n11
+    n4-->|slave|n7
+    n7-->n8
+    n7-->|NIVEAU 8b|n9
+    n8-->|clk 40MHz|n9
+    n8-->|clk 2kHz - trigger|n9
+    n9-.->|"Q_ADC_OUT conduit"|n12
+    n12-.->|"Q_ADC_IN conduit"|n9
+    n9-->|vect_capt + data_ready|n7
+
+    style n7 stroke:#2563EB,stroke-width:2px
+    style n9 stroke:#2563EB,stroke-width:2px
+    style n8 stroke:#2563EB,stroke-width:2px
+```
 
 ---
 
-## Architecture de l'implémentation
+## Principe de fonctionnement
 
-> `![Architecture du système](./architecture_component_tutorial.jpg)`
+Le composant `acquisition_avalon_interface` orchestre trois sous-modules :
+
+1. **`pll_2freqs`** — génère deux horloges à partir du 50 MHz système :
+   - `c0` = **40 MHz** : horloge SPI pour le LTC2308
+   - `c1` = **2 kHz** : signal de déclenchement des acquisitions (`data_capture`)
+
+2. **`capteurs_sol_seuil`** — pilote le LTC2308 en SPI, lit les 7 canaux ADC (12 bits), tronque à 8 bits significatifs et compare chaque valeur au seuil `NIVEAU` :
+   - `vect_capt[i] = 1` si `data[i] > NIVEAU` (capteur au-dessus de la ligne)
+   - `vect_capt[i] = 0` sinon
+
+3. **`acquisition_avalon_interface`** — registre Avalon MM slave :
+   - en écriture : reçoit le seuil `NIVEAU` (bits [7:0] de `writedata`)
+   - en lecture : retourne `data_ready` (bit 0) et `vect_capt[6:0]` (bits [7:1])
 
 ---
 
-## Principe d'interfaçage avec le bus Avalon
+## Registre de commande Avalon
 
-Le bus **Avalon Memory-Mapped (Avalon MM)** est un protocole maître–esclave synchrone. Le processeur Nios II agit en **maître** ; notre composant custom agit en **esclave**.
+| Accès | Bits | Champ | Description |
+|-------|------|-------|-------------|
+| Write | [7:0] | `NIVEAU` | Seuil de comparaison ADC (0–255) |
+| Write | [31:8] | — | Réservés |
 
-### Signaux du slave Avalon MM
+Le résultat `vect_capt[6:0]` n'est pas destiné à être lu par le Nios II : il est exporté directement sur les LEDs via le conduit `Q_export[7:1]` dans `sysRobot.vhd`.
 
-| Signal        | Direction (slave) | Rôle                                              |
-|---------------|-------------------|---------------------------------------------------|
-| `clk`         | entrée            | Horloge système                                   |
-| `resetn`      | entrée            | Reset actif bas                                   |
-| `address`     | entrée            | Adresse du registre sélectionné                   |
-| `chipselect`  | entrée            | Active le composant pour la transaction           |
-| `write`       | entrée            | Indique une écriture                              |
-| `read`        | entrée            | Indique une lecture                               |
-| `writedata`   | entrée (16 bits)  | Donnée à écrire dans le registre                  |
-| `byteenable`  | entrée (2 bits)   | Sélection octet bas / haut                        |
-| `readdata`    | sortie (16 bits)  | Donnée relue depuis le registre                   |
-| `Q_export`    | sortie (16 bits)  | Conduit : valeur exportée vers les afficheurs     |
+---
 
+## Signaux de acquisition_avalon_interface
 
+**Entrées — Nios II → composant**
 
-### Étapes de déclaration du composant dans Qsys
+| Signal | Type | Description |
+|--------|------|-------------|
+| `clock` | STD_LOGIC | Horloge 50 MHz |
+| `resetn` | STD_LOGIC | Reset actif bas |
+| `chipselect` | STD_LOGIC | Sélection du composant |
+| `write` | STD_LOGIC | Transaction écriture |
+| `read` | STD_LOGIC | Transaction lecture |
+| `writedata[31:0]` | SLV 31:0 | Seuil NIVEAU (bits [7:0]) |
+| `byteenable[3:0]` | SLV 3:0 | Masque octet |
 
-1. **Component Type** — nommer le composant (`reg16_avalon_interface`) et le groupe (`My Own IP Cores`).
-2. **Files** — ajouter les fichiers HDL (`reg16_avalon_interface.vhd`, `reg16.vhd`) et lancer l'analyse.
-3. **Signals** — associer chaque port à son interface et son type de signal :
-   - `clock` → `clock_sink` / `clk`
-   - `resetn` → `reset_sink` / `reset_n`
-   - `writedata`, `readdata`, `write`, `read`, `chipselect`, `byteenable` → `avalon_slave_0`
-   - `Q_export` → `conduit_end` / `export`
-4. **Interfaces** — associer `avalon_slave_0` au clock (`clock_sink`) et au reset (`reset_sink`), mettre `Read wait = 0`.
-5. **Finish** — sauvegarder le composant `.tcl` dans le dossier `ip_core/`.
+**Sorties — composant → extérieur**
+
+| Signal | Type | Description |
+|--------|------|-------------|
+| `readdata[31:0]` | SLV 31:0 | data_ready + vect_capt |
+| `Q_ADC_OUT[0]` | STD_LOGIC | LTC_ADC_CONVST — déclenchement conversion |
+| `Q_ADC_OUT[1]` | STD_LOGIC | LTC_ADC_SCK — horloge SPI |
+| `Q_ADC_OUT[2]` | STD_LOGIC | LTC_ADC_SDI — données SPI vers ADC |
+| `Q_export[0]` | STD_LOGIC | data_ready — export vers LEDs |
+| `Q_export[7:1]` | SLV 7:1 | vect_capt[6:0] — export vers LEDs |
+
+**Entrée conduit — ADC → composant**
+
+| Signal | Type | Description |
+|--------|------|-------------|
+| `Q_ADC_IN` | STD_LOGIC | LTC_ADC_SDO — données SPI depuis ADC |
+
+> `Q_ADC_OUT`, `Q_ADC_IN` et `Q_export` sont des **conduits Avalon** : non routés sur l'interconnect MM, connectés directement aux broches physiques du FPGA dans `sysRobot.vhd`.
 
 ---
 
 ## Arborescence du projet
 
 ```
-DE1_Basic_Computer/
-├── component_tutorial.vhd      # Top-level : instancie embedded_system + hex7seg
-├── hex7seg.vhd                 # Décodeur BCD → 7 segments
+CUTEcar_acquisition/
 │
-├── ip_core/                    # Composants IP personnalisés
-│   ├── reg16_avalon_interface.vhd
-│   ├── reg16.vhd
-│   └── reg16_avalon_interface_hw.tcl   # Descripteur Qsys du composant
+├── sysRobot.vhd                        # Top-level VHDL — instancie nios_system,
+│                                       # connecte FPGA aux E/S physiques
+│                                       # (CLOCK_50, KEY, DRAM_*, LTC_ADC_*, MTRR/MTRL)
 │
-├── /nios_system
-│       └── /synthesis
-│             └──  nios_system.vhd
-├── nios_system.qsys            # Système Qsys (Nios II + mémoire + reg16)
+├── nios_system/
+│   ├── nios_system.qsys                # Fichier de projet Qsys
+│   └── synthesis/
+│       └── nios_system.qip             # Fichier d'inclusion pour Quartus II
 │
-└── app_software/
-    └── component_tutorial.ncf    # Projet Altera Monitor Program
+├── ip_cores/
+│   ├── CAPTEURS/
+|         ├── acquisition_avalon_interface.vhd  # Interface Avalon MM slave (composant custom)
+│         │                                     # Registre R/W, instancie pll_2freqs
+│         │                                     # et capteurs_sol_seuil
+│         ├── capteurs_sol_seuil.vhd            # Pilote SPI LTC2308, seuillage 7 capteurs,
+│         │                                     # retourne vect_capt[6:0]
+│         └──pll_2freqs.vhd                    # PLL Altera — génère 40 MHz et 2 kHz
+│                                              # depuis horloge 50 MHz système
+|   └── PWM/
+│         ├── pwm_avalon_interface.vhd          # Interface Avalon MM slave PWM
+│         └── PWM_generation.vhd               # Logique PWM 16 kHz 2 canaux
+│
+└── software/
+    └── carac-motor.c                     # Code C Nios II — Détermination expérimentale
+                                          # de la vitesse minimale de démarrage des roues.
+                                          # Envoie des commandes PWM croissantes via
+                                          # IOWR_32DIRECT à PWM_AVALON_INTERFACE_0_BASE
+                                          # (adresse définie dans system.h, générée par le BSP)
 ```
 
 ---
 
-## Fichiers clés
+## Utilisation depuis le logiciel Nios II
 
-| Fichier | Rôle |
-|---|---|
-| `nios_system.qsys` | Définition du système embarqué (Qsys) |
-| `nios_system.vhd ` | Description hdl du nios  (Qsys) |
-| `component_tutorial.vhd` | Module top-level FPGA |
-| `hex7seg.vhd` | Conversion hexa → afficheur 7 segments |
-| `ip_core/reg16_avalon_interface.vhd` | Wrapper Avalon MM du registre 16 bits |
-| `ip_core/reg16.vhd` | Registre 16 bits |
-| `ip_core/reg16_avalon_interface_hw.tcl` | Descripteur d'interface Qsys |
-| `app_software/component_tutorial.ncf` | Test fonctionnel via Altera Monitor Program |
+Le Nios II écrit le seuil `NIVEAU` directement en mémoire à l'adresse du composant. Le résultat `vect_capt[6:0]` est retourné en temps réel sur les LEDs physiques de la carte via le conduit `Q_export`.
 
 ---
 
-## Compilation et test
+## Remarques de conception
 
-### 1. Générer le système Qsys
-
-Ouvrir `nios_system.qsys` dans Qsys → onglet **Generation** → **Generate**.
-
-### 2. Compiler avec Quartus II
-
-```bash
-quartus_sh --flow compile DE1_Basic_Computer
-```
-
-Ou via l'interface graphique : **Processing → Start Compilation**.
-
-
-### 3. Test via Altera Monitor Program
-
-- Ouvrir Monitor Program → nouveau projet → sélectionner `nios_system.qsys`
-- Onglet **Memory** → **Query All Devices** → **Refresh Memory**
-- Adresse `0x00800000` : valeur initiale `0000`
-- Éditer la valeur → observer les changements sur `HEX0`…`HEX3`
-
----
-
-## Résultats attendus
-
-| Valeur écrite (hex) | Affichage HEX3..HEX0 |
-|---|---|
-| `0x0000` | `0 0 0 0` |
-| `0x1234` | `1 2 3 4` |
-| `0xABCD` | `A b C d` |
-
----
-
-## Références
-
-- Altera Corporation, *Making Qsys Components — For Quartus II 13.0*, University Program, May 2013
-- Altera Corporation, *Avalon Interface Specifications*
+- La PLL génère **40 MHz** pour le SPI (contrainte max du LTC2308) et **2 kHz** comme cadence d'acquisition des capteurs, soit une mesure toutes les 500 µs.
+- Le seuil `NIVEAU` (8 bits) est configurable par le logiciel Nios II, ce qui permet d'ajuster la sensibilité selon les conditions d'éclairage sans recompiler le bitstream.
+- Les données ADC sont sur 12 bits ; seuls les 8 bits de poids fort (`data[11:4]`) sont conservés pour le seuillage, ce qui simplifie le calcul tout en conservant une résolution suffisante.
+- `Q_export[7:0]` est câblé sur les LEDs dans `sysRobot.vhd` pour visualiser en temps réel la position du robot sur la ligne.
