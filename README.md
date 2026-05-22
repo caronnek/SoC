@@ -14,29 +14,29 @@ Le schéma ci-dessous présente l'architecture globale, inspirée de la figure 1
 graph TD
     subgraph FPGA ["FPGA - DE10-Lite / CUTEcar"]
         subgraph QSYS ["nios_system - Qsys"]
-            NIOS["Nios II/e"]
-            RAM["On-chip RAM"]
-            SDRAM_C["SDRAM ctrl"]
-            AVALON["Avalon Interconnect"]
-            PWM_IF["pwm_avalon_interface"]
-            PWM_GEN["PWM_generation - 16 kHz - 2 canaux"]
+            N1["Nios II/e"]
+            N2["On-chip RAM"]
+            N3["SDRAM ctrl"]
+            N4["Avalon Interconnect"]
+            N5["pwm_avalon_interface"]
+            N6["PWM_generation - 16 kHz - 2 canaux"]
         end
-        SDRAM_EXT["SDRAM 32 MB"]
+        N7["SDRAM 32 MB"]
     end
-    MOTORS["Moteurs DC CUTEcar"]
+    N8["Moteurs DC CUTEcar"]
 
-    NIOS     -->|master|        AVALON
-    RAM      -->|slave|         AVALON
-    SDRAM_C  -->|slave|         AVALON
-    SDRAM_C  -->                SDRAM_EXT
-    AVALON   -->|slave|         PWM_IF
-    PWM_IF   -->|writedata 32b| PWM_GEN
-    PWM_GEN  -.->|"Q_export conduit"| MOTORS
+    N1 -->|master|        N4
+    N2 -->|slave|         N4
+    N3 -->|slave|         N4
+    N3 -->                N7
+    N4 -->|slave|         N5
+    N5 -->|writedata 32b| N6
+    N6 -.->|"Q_export conduit"| N8
 
-    style PWM_IF  fill:#FAECE7,stroke:#D85A30,color:#712B13
-    style PWM_GEN fill:#FAEEDA,stroke:#BA7517,color:#633806
-    style AVALON  fill:#EEEDFE,stroke:#534AB7,color:#26215C
-    style MOTORS  fill:#FAECE7,stroke:#D85A30,color:#712B13Sonnet
+    style N5 fill:#FAECE7,stroke:#D85A30,color:#712B13
+    style N6 fill:#FAEEDA,stroke:#BA7517,color:#633806
+    style N4 fill:#EEEDFE,stroke:#534AB7,color:#26215C
+    style N8 fill:#FAECE7,stroke:#D85A30,color:#712B13
 ```
 
 ### Signaux de pwm_avalon_interface
