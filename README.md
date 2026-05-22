@@ -17,7 +17,7 @@ graph TD
             n1["Nios II/e"]
             n2["On-chip RAM"]
             n3["SDRAM ctrl"]
-            n4["Bus Avalon"]
+            n4["Avalon Interconnect"]
             n5["pwm_avalon_interface"]
             n6["PWM_generation - 16kHz - 2 canaux"]
         end
@@ -31,7 +31,7 @@ graph TD
     n3-->n7
     n4-->|slave|n5
     n5-->|writedata 32b|n6
-    n6-.->|Q_export conduit|n8
+    n6-.->|Q_export 4b conduit|n8
 
     style n5 stroke:#D85A30,stroke-width:2px
     style n6 stroke:#BA7517,stroke-width:2px
