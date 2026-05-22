@@ -43,7 +43,7 @@ graph TD
     n9-.->|Q_ADC_OUT conduit|n12
     n12-.->|Q_ADC_IN conduit|n9
     n9-->|vect_capt + data_ready|n7
-    n7-.->|Q_export conduit|n13
+    n9-.->|Q_export conduit|n13
  
     style n7 stroke:#2563EB,stroke-width:2px
     style n9 stroke:#2563EB,stroke-width:2px
